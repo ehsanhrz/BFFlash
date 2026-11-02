@@ -1,0 +1,26 @@
+# Local smoke test against a real provider. Start Keycloak with:
+#
+#   docker run --rm -p 8180:8080 \
+#     -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+#     -v "$PWD/examples/keycloak:/opt/keycloak/data/import:ro" \
+#     quay.io/keycloak/keycloak:26.0 start-dev --import-realm
+#
+# Then run the upstream with `go run ./examples/keycloak/echo` and this config
+# from the repo root. Log in at http://localhost:8080/bff/login as
+# dev / dev-password. Access tokens last 60 seconds, so refresh is easy to watch.
+
+server:
+  public_url: http://localhost:8080
+
+oidc:
+  issuer: http://localhost:8180/realms/bfflash
+  client_id: bfflash
+  client_secret: dev-secret-not-for-production
+  scopes: [openid, profile, email]
+
+frontend:
+  dir: examples/keycloak/web
+
+apis:
+  - path: /api
+    to: http://localhost:9090

@@ -1,0 +1,34 @@
+{
+  "realm": "bfflash",
+  "enabled": true,
+  "accessTokenLifespan": 60,
+  "clients": [
+    {
+      "clientId": "bfflash",
+      "secret": "dev-secret-not-for-production",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "redirectUris": ["http://localhost:8080/bff/callback"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:8080/*",
+        "backchannel.logout.url": "http://host.docker.internal:8080/bff/backchannel-logout",
+        "backchannel.logout.session.required": "true"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "dev",
+      "enabled": true,
+      "email": "dev@example.test",
+      "emailVerified": true,
+      "firstName": "Dev",
+      "lastName": "User",
+      "credentials": [{ "type": "password", "value": "dev-password", "temporary": false }]
+    }
+  ]
+}

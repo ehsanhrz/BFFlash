@@ -1,0 +1,69 @@
+# Everything that can be set. Run `bfflash routes -c examples/full.yaml` to see
+# what each path ends up with after defaults cascade.
+
+server:
+  listen: ":8080"
+  public_url: https://app.example.com  # default: taken from each request
+  base_path: /bff                      # management endpoints
+  csrf_header: X-CSRF
+  max_body_bytes: 10485760
+
+oidc:
+  issuer: https://idp.example.com
+  client_id: bfflash
+  client_secret: ${OIDC_CLIENT_SECRET}
+  scopes: [openid, profile, email, offline_access]
+  client_scopes: [api.read]            # used by token: client
+
+session:
+  store: redis                         # default: memory
+  url: ${REDIS_URL}
+  encryption_key: ${SESSION_KEY}       # at least 32 characters
+  idle_ttl: 30m
+  absolute_ttl: 12h
+
+frontend:
+  dir: ./dist                          # or url: http://web:3000
+
+# Applies to every path below unless overridden.
+defaults:
+  timeout: 10s
+  retries: 1                           # idempotent requests only
+  rate_limit: 100/s per session
+
+apis:
+  # A prefix covers everything under it: /api/orders/x -> /v1/x
+  - path: /api/orders
+    to: http://orders:8080/v1
+
+  # Exceptions only for the paths that differ.
+  - path: /api/catalog
+    to: http://catalog:8080
+    token: none
+    rules:
+      - match: GET /featured/**
+        cache: 30s
+      - match: POST /search
+        rate_limit: 5/s per ip
+
+  # Service-to-service credentials rather than the user's.
+  - path: /api/reports
+    to: http://reports:8080
+    token: client
+    timeout: 60s
+
+  # A new service costs one word in allow, and no new block.
+  - path: /api/{service}
+    to: http://{service}.prod.svc:8080
+    allow: [billing, search, users]
+
+compose:
+  # One call to the frontend, several to the backends. Each step goes through
+  # the API it names, so it inherits that API's token, timeout and rate rules.
+  - path: /api/dashboard
+    cache: 5s
+    steps:
+      - { id: me, get: "/api/users/me" }
+      - { id: orders, get: "/api/orders?user=${steps.me.body.id}", optional: true }
+    respond: |
+      {"name": steps.me.body.name, "orders": steps.orders.body}

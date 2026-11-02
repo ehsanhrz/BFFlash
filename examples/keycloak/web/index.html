@@ -1,0 +1,22 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>BFFlash smoke test</title>
+<h1>BFFlash smoke test</h1>
+<p><a href="/bff/login">Log in</a></p>
+<button id="user">GET /bff/user</button>
+<button id="api">GET /api/hello</button>
+<button id="out">POST /bff/logout</button>
+<pre id="out-text"></pre>
+<script>
+  const show = (t) => (document.getElementById("out-text").textContent = t);
+  const call = async (path, method = "GET") => {
+    const r = await fetch(path, { method, headers: { "X-CSRF": "1" } });
+    return { status: r.status, text: await r.text() };
+  };
+  document.getElementById("user").onclick = async () => show(JSON.stringify(await call("/bff/user"), null, 2));
+  document.getElementById("api").onclick = async () => show(JSON.stringify(await call("/api/hello"), null, 2));
+  document.getElementById("out").onclick = async () => {
+    const r = await call("/bff/logout", "POST");
+    location.href = JSON.parse(r.text).redirect;
+  };
+</script>
