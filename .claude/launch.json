@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "bfflash",
+      "runtimeExecutable": "go",
+      "runtimeArgs": ["run", "./cmd/bfflash", "serve", "-c", "examples/keycloak/bfflash.yaml"],
+      "port": 8080
+    },
+    {
+      "name": "smoke-echo",
+      "runtimeExecutable": "go",
+      "runtimeArgs": ["run", "./examples/keycloak/echo"],
+      "port": 9090
+    }
+  ]
+}

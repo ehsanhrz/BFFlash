@@ -1,0 +1,6 @@
+/bfflash
+/bfflash.exe
+/dist/
+*.test
+*.out
+.env

@@ -1,0 +1,14 @@
+# The whole file. Every path under /api gets login, CSRF protection and token
+# forwarding, and a new backend endpoint needs no change here.
+
+oidc:
+  issuer: https://idp.example.com
+  client_id: bfflash
+  client_secret: ${OIDC_CLIENT_SECRET}
+
+frontend:
+  url: http://web:3000
+
+apis:
+  - path: /api
+    to: http://gateway:8080
